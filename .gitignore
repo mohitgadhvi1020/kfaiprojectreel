@@ -1,0 +1,14 @@
+node_modules/
+.next/
+.env.local
+.env
+out/
+build/
+*.tsbuildinfo
+next-env.d.ts
+.data/
+.research-backups/
+
+# Daily motivation cache (one file per day)
+.daily-motivation-cache/
+public/hooks/

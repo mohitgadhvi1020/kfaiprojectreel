@@ -1,0 +1,1722 @@
+{
+  "name": "Instagram Content Factory",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "30 6 * * *"
+            }
+          ]
+        },
+        "options": {
+          "timezone": "Asia/Kolkata"
+        }
+      },
+      "id": "discovery-trigger",
+      "name": "Daily Discovery (6:30 AM IST)",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.perplexity.ai/chat/completions",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer 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"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "{ \"model\": \"sonar-pro\", \"messages\": [ { \"role\": \"user\", \"content\": \"Find 6 AI startups that raised funding in the past 7 days. I need lesser-known companies building genuine technical products, NOT big names like OpenAI, Anthropic, Google, Meta, Mistral, etc. Exclude companies that are simple ChatGPT wrappers or basic API integrations.\\n\\nFor each startup provide this EXACT format:\\nNAME | FUNDING_AMOUNT | ROUND_TYPE | ONE_LINE_DESCRIPTION | LEAD_INVESTOR | KEY_TECH_USED\\n\\nCategories:\\n\\nBIG (2 startups, $50M+):\\n1. Name | $Amount | Round | Description | Investor | Tech\\n2. Name | $Amount | Round | Description | Investor | Tech\\n\\nSMALL (4 startups, $500K to $20M):\\n3. Name | $Amount | Seed/Pre-seed | Description | Investor | Tech\\n4. Name | $Amount | Seed | Description | Investor | Tech\\n5. Name | $Amount | Series A | Description | Investor | Tech\\n6. Name | $Amount | Pre-seed/Seed | Description | Investor | Tech\\n\\nFor SMALL category, focus on niches: healthcare AI, legal AI, climate AI, fintech AI, robotics, cybersecurity AI, developer tools, AI infrastructure.\\n\\nPlain text only, no bold or markdown. Exactly 2 big and 4 small. Each must be building real technology, not just wrapping existing APIs.\\n\\nFor EACH startup append to the line: | BUILDER_VALUE (high, medium, or low). BUILDER_VALUE means: can a developer learn something useful from how this company builds (architecture, training, eval, data, infra)? ONLY include startups where BUILDER_VALUE is medium or high.\\n\\nEXCLUDE: pure enterprise sales plays with no interesting tech; simple ChatGPT/API wrappers with no novel architecture; infrastructure deals like power plants or generic data centers with no developer angle.\" } ] }",
+        "options": {}
+      },
+      "id": "search-startups",
+      "name": "Search Startup Funding",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        250,
+        -100
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.perplexity.ai/chat/completions",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer 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"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "{ \"model\": \"sonar-pro\", \"messages\": [ { \"role\": \"user\", \"content\": \"Search X (Twitter) for the most valuable, practical AI/ML posts from these specific accounts in the last 7 days: @karpathy, @dair_ai, @rasbt, @svpino, @_philschmid, @hwchung27, @ClementDelworker, @TheAITimeline, @ai_for_success.\\n\\nFocus ONLY on posts about: new tools released, code tutorials, model fine-tuning tips, agentic workflow patterns, open-source releases, architecture insights, and how-I-built threads.\\n\\nIgnore: promotional fluff, jokes, pure politics, low-signal retweets, personal life updates.\\n\\nFor EACH valuable post (up to 8), return EXACTLY this pipe-separated format on ONE line:\\nAUTHOR | FULL_POST_TEXT | PRACTICAL_TAKEAWAY | REEL_POTENTIAL | POST_URL\\n\\nFULL_POST_TEXT: Include the COMPLETE text of the post, not a summary. If the post contains code snippets, include them. If it is a thread, include all parts.\\nPOST_URL: The direct URL to the tweet/post (e.g. https://x.com/karpathy/status/...). If you cannot find the exact URL, leave empty.\\nREEL_POTENTIAL is exactly: high OR medium OR low\\n\\nOnly include posts where REEL_POTENTIAL is high or medium. If an account had no valuable posts in 48 hours, skip them.\\nPlain text only, no bold or markdown.\" } ] }",
+        "options": {}
+      },
+      "id": "search-x-builders",
+      "name": "Search X Builder Insights",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        250,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.perplexity.ai/chat/completions",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer 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"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "{ \"model\": \"sonar\", \"messages\": [ { \"role\": \"user\", \"content\": \"What AI and machine learning topics are trending on Instagram Reels, YouTube Shorts, and Twitter/X right now?\\n\\nTell me:\\n1. Top 5 AI topics being discussed by tech creators in the past 7 days\\n2. What formats are getting the most engagement (talking head, screen recording, carousel, whiteboard)\\n3. What AI concepts are people searching for or asking about\\n4. Any AI controversies or debates happening right now\\n\\nFor each trending topic provide:\\nTOPIC | PLATFORM | SUGGESTED_CONTENT_ANGLE\\n\\nFocus on what tech builders, engineers, and AI-focused creators are covering, not generic motivational content.\\nPlain text only, no bold or markdown.\" } ] }",
+        "options": {}
+      },
+      "id": "search-trending",
+      "name": "Search Trending Content",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        250,
+        100
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "append",
+        "options": {},
+        "numberInputs": 3
+      },
+      "id": "wait-discovery",
+      "name": "Wait For Discovery",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3,
+      "position": [
+        520,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const clean = (s) => (s || '').replace(/\\*\\*/g, '').replace(/\\*/g, '').replace(/\\[\\d+\\]/g, '').replace(/\\[|\\]/g, '').replace(/^#+\\s*/g, '').trim();\n\nfunction getContent(nodeName) {\n  try {\n    const raw = $(nodeName).first().json;\n    return raw.choices?.[0]?.message?.content || raw.content?.[0]?.text || '';\n  } catch (e) { return ''; }\n}\n\nfunction getXBuilderRaw(nodeName) {\n  try {\n    const raw = $(nodeName).first().json;\n    if (raw.choices?.[0]?.message?.content) return String(raw.choices[0].message.content);\n    if (raw.output && Array.isArray(raw.output)) {\n      const parts = [];\n      for (const item of raw.output) {\n        if (item.content) {\n          if (typeof item.content === 'string') parts.push(item.content);\n          else if (Array.isArray(item.content)) {\n            for (const c of item.content) {\n              if (c && c.text) parts.push(c.text);\n              else if (typeof c === 'string') parts.push(c);\n            }\n          }\n        }\n        if (item.text) parts.push(item.text);\n        if (item.message && item.message.content) {\n          const mc = item.message.content;\n          if (typeof mc === 'string') parts.push(mc);\n        }\n      }\n      if (parts.length) return parts.join('\\n');\n    }\n    if (raw.text) return String(raw.text);\n    return JSON.stringify(raw).slice(0, 15000);\n  } catch (e) { return ''; }\n}\n\nconst startupsContent = getContent('Search Startup Funding');\nconst xBuilderContent = getContent('Search X Builder Insights');\nconst trendingContent = getContent('Search Trending Content');\n\nfunction parsePipeLines(text, minPipes) {\n  const results = [];\n  for (const line of text.split('\\n')) {\n    const t = line.trim();\n    if (t.includes('|') && (t.match(/\\|/g) || []).length >= minPipes) {\n      const parts = t.replace(/^[\\d\\-\\*\\.\\)\\]]+\\s*/, '').split('|').map(p => clean(p));\n      if (parts[0] && parts[0].length > 1) results.push(parts);\n    }\n  }\n  return results;\n}\n\nfunction extractNumberedItems(text) {\n  const results = [];\n  const lines = text.split('\\n');\n  for (let i = 0; i < lines.length; i++) {\n    const t = lines[i].trim();\n    const m = t.match(/^\\d+[\\.\\)\\:]\\s*(.+)/);\n    if (m) {\n      let item = clean(m[1]);\n      if (item.length > 3 && item.length < 200) results.push(item);\n    }\n  }\n  return results;\n}\n\nfunction extractBoldItems(text) {\n  const results = [];\n  const matches = text.match(/\\*\\*([^*]+)\\*\\*/g) || [];\n  for (const m of matches) {\n    const item = m.replace(/\\*\\*/g, '').trim();\n    if (item.length > 2 && item.length < 100) results.push(item);\n  }\n  return results;\n}\n\nconst skipWords = ['NAME', 'FUNDING', 'ROUND', 'DESCRIPTION', 'HEADLINE', 'COMPANY', 'CATEGORY', 'TOPIC', 'BIG', 'SMALL', 'EXAMPLE', 'AUTHOR', 'POST_SUMMARY'];\n\nconst startups = [];\nconst pipeStartups = parsePipeLines(startupsContent, 2);\nfor (const parts of pipeStartups) {\n  if (skipWords.some(w => parts[0].toUpperCase().includes(w))) continue;\n  const builderVal = (parts[6] || '').toLowerCase();\n  if (builderVal && builderVal.includes('low') && !builderVal.includes('flow')) continue;\n  startups.push({\n    name: parts[0],\n    funding: parts[1] || 'Unknown',\n    round: parts[2] || 'Unknown',\n    description: parts[3] || 'AI startup',\n    investor: parts[4] || 'Unknown',\n    tech: parts[5] || 'Unknown',\n    builder_value: parts[6] || ''\n  });\n}\nif (startups.length === 0) {\n  const dollarPattern = /\\$(\\d+[\\d\\.]*\\s*[MBK](?:illion)?)/gi;\n  const lines = startupsContent.split('\\n');\n  for (const line of lines) {\n    const t = clean(line);\n    const dollarMatch = t.match(dollarPattern);\n    if (dollarMatch && t.length > 10) {\n      const name = t.replace(/^\\d+[\\.\\)\\:]\\s*/, '').split(/[:\\-\\(\\|]/)[0].trim();\n      if (name.length > 1 && name.length < 80) {\n        const funding = dollarMatch[0];\n        const roundMatch = t.match(/\\b(Seed|Pre-seed|Series [A-Z]|Series A|Series B|Series C)\\b/i);\n        startups.push({ name: clean(name), funding, round: roundMatch ? roundMatch[0] : 'Unknown', description: t.substring(0, 120), investor: 'Unknown', tech: 'Unknown', builder_value: '' });\n      }\n    }\n  }\n}\nif (startups.length === 0) {\n  const boldItems = extractBoldItems(startupsContent);\n  const numbered = extractNumberedItems(startupsContent);\n  const items = boldItems.length > 0 ? boldItems : numbered;\n  for (const item of items.slice(0, 6)) {\n    startups.push({ name: item.split(/[:\\-\\(\\|]/)[0].trim().substring(0, 60), funding: 'See details', round: 'Recent', description: item.substring(0, 120), investor: 'Unknown', tech: 'Unknown', builder_value: '' });\n  }\n}\n\nconst xTips = [];\nconst pipeTips = parsePipeLines(xBuilderContent, 3);\nfor (const parts of pipeTips) {\n  if (skipWords.some(w => parts[0].toUpperCase().includes(w))) continue;\n  const rp = (parts[3] || '').toLowerCase();\n  if (rp.includes('low') && !rp.includes('flow') && !rp.includes('below')) continue;\n  if (!rp.includes('high') && !rp.includes('medium') && !rp.includes('med')) continue;\n  const maybeUrl = (parts[4] || '').trim();\n  const postUrl = maybeUrl.startsWith('http') ? maybeUrl : '';\n  xTips.push({\n    author: parts[0],\n    post_summary: parts[1] || '',\n    practical_takeaway: parts[2] || '',\n    reel_potential: parts[3] || 'medium',\n    post_snippet: '',\n    post_url: postUrl\n  });\n}\nif (xTips.length === 0) {\n  const lines = xBuilderContent.split('\\n');\n  for (const line of lines) {\n    const t = line.trim();\n    if (t.length < 20) continue;\n    if (t.includes('|') && (t.match(/\\|/g) || []).length >= 2) {\n      const p = t.replace(/^[\\d\\-\\*\\.\\)\\]]+\\s*/, '').split('|').map(x => clean(x));\n      if (p[0] && p[0].length > 1 && !skipWords.some(w => p[0].toUpperCase().includes(w))) {\n        const mu = (p[4] || '').trim();\n        xTips.push({ author: p[0], post_summary: p[1] || t.substring(0, 200), practical_takeaway: p[2] || '', reel_potential: 'medium', post_snippet: '', post_url: mu.startsWith('http') ? mu : '' });\n      }\n    }\n    if (xTips.length >= 8) break;\n  }\n}\n\nconst trending = [];\nconst pipeTrending = parsePipeLines(trendingContent, 1);\nfor (const parts of pipeTrending) {\n  if (skipWords.some(w => parts[0].toUpperCase().includes(w))) continue;\n  trending.push({ topic: parts[0], platform: parts[1] || 'Instagram', angle: parts[2] || '' });\n}\nif (trending.length === 0) {\n  const numbered = extractNumberedItems(trendingContent);\n  const boldItems = extractBoldItems(trendingContent);\n  const items = numbered.length >= 3 ? numbered : (boldItems.length >= 3 ? boldItems : numbered);\n  for (const item of items.slice(0, 5)) {\n    const topic = item.split(/[:\\|]/)[0].trim().substring(0, 80);\n    if (topic.length > 3) trending.push({ topic, platform: 'Instagram', angle: item.substring(0, 150) });\n  }\n}\n\nreturn [{ json: {\n  startups: startups.slice(0, 6),\n  x_tips: xTips.slice(0, 8),\n  trending: trending.slice(0, 5),\n  raw_startups: startupsContent.substring(0, 500),\n  raw_x_builders: xBuilderContent.substring(0, 800),\n  raw_trending: trendingContent.substring(0, 500)\n} }];"
+      },
+      "id": "parse-discovery",
+      "name": "Parse All Results",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        720,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const enc = (s) => encodeURIComponent(s || '');\nconst buildUrl = (base, params) => base + '?' + Object.entries(params).map(([k, v]) => enc(k) + '=' + enc(v)).join('&');\n\nconst input = items[0].json;\nconst startups = input.startups || [];\nconst xTips = input.x_tips || [];\nconst trending = input.trending || [];\nconst webhookBase = 'https://modudhanu.app.n8n.cloud/webhook/instagram-content';\n\nlet emailBody = 'YOUR DAILY CONTENT PICKS\\n';\nemailBody += 'Startup links: full package (reel + carousel + caption). X Builder links: tip reel package. Trending: inspiration only.\\n\\n';\n\nemailBody += '=============================================\\n';\nemailBody += 'STARTUP BREAKDOWNS\\n';\nemailBody += '=============================================\\n\\n';\n\nfor (let i = 0; i < startups.length; i++) {\n  const s = startups[i];\n  const url = buildUrl(webhookBase, { type: 'startup', name: s.name, funding: s.funding, round: s.round, desc: s.description });\n  emailBody += (i + 1) + '. ' + s.name + '\\n';\n  emailBody += '   Funding: ' + s.funding + ' (' + s.round + ')\\n';\n  emailBody += '   ' + s.description + '\\n';\n  emailBody += '   Tech: ' + s.tech + ' | Investor: ' + s.investor + '\\n';\n  emailBody += '\\n   >> GENERATE CONTENT: ' + url + '\\n\\n';\n  emailBody += '   --------------------------------\\n\\n';\n}\n\nemailBody += '=============================================\\n';\nemailBody += 'X BUILDER INSIGHTS (from tracked accounts)\\n';\nemailBody += '=============================================\\n\\n';\n\nfor (let i = 0; i < xTips.length; i++) {\n  const t = xTips[i];\n  const post = (t.post_snippet || t.post_summary || '').substring(0, 800);\n  const url = buildUrl(webhookBase, {\n    type: 'x_tip',\n    author: t.author,\n    summary: t.post_summary || '',\n    takeaway: t.practical_takeaway || '',\n    post: post,\n    post_url: t.post_url || ''\n  });\n  emailBody += (i + 1) + '. @' + t.author + '\\n';\n  emailBody += '   ' + (t.post_summary || '') + '\\n';\n  emailBody += '   Takeaway: ' + (t.practical_takeaway || '') + '\\n';\n  emailBody += '   Reel potential: ' + (t.reel_potential || '') + '\\n';\n  if (t.post_url) emailBody += '   Original post: ' + t.post_url + '\\n';\n  emailBody += '\\n   >> GENERATE CONTENT: ' + url + '\\n\\n';\n  emailBody += '   --------------------------------\\n\\n';\n}\n\nemailBody += '=============================================\\n';\nemailBody += 'TRENDING TOPICS (inspiration only \u2014 no auto-generate link)\\n';\nemailBody += '=============================================\\n\\n';\n\nfor (let i = 0; i < Math.min(trending.length, 5); i++) {\n  const t = trending[i];\n  emailBody += (i + 1) + '. ' + t.topic + '\\n';\n  emailBody += '   Platform: ' + t.platform + '\\n';\n  if (t.angle) emailBody += '   Angle: ' + t.angle + '\\n';\n  emailBody += '\\n';\n}\n\nemailBody += 'Click startup or X Builder links above to generate a full Instagram content package.';\n\nconst allNames = startups.map(s => s.name).slice(0, 2);\nconst extra = xTips.length ? (' + ' + xTips.length + ' X tips') : '';\nconst subject = 'Daily Content Picks: ' + allNames.join(', ') + extra + ' + trending';\n\nreturn [{ json: { emailBody, subject } }];"
+      },
+      "id": "build-discovery-email",
+      "name": "Build Selection Email",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        940,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "sendTo": "dhanumohitghanghaniya@gmail.com",
+        "subject": "={{ $json.subject }}",
+        "emailType": "text",
+        "message": "={{ $json.emailBody }}",
+        "options": {}
+      },
+      "id": "send-discovery-email",
+      "name": "Send Selection Email",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        1160,
+        0
+      ],
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "4DYU3b2FWRccyId8",
+          "name": "Gmail OAuth2 API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "path": "instagram-content",
+        "options": {
+          "responseData": "Content generation started. Check your email in 3-4 minutes."
+        }
+      },
+      "id": "content-webhook",
+      "name": "Content Generator (Webhook)",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        0,
+        500
+      ],
+      "webhookId": "instagram-content"
+    },
+    {
+      "parameters": {
+        "jsCode": "let data;\ntry { data = $input.first().json; } catch(e) { data = items[0].json; }\nconst query = data.query || data.params || data;\n\nfunction g(key) {\n  let val = '';\n  if (query && query[key] !== undefined) val = query[key];\n  else if (data && data[key] !== undefined) val = data[key];\n  if (!val) return '';\n  try { return decodeURIComponent(String(val)); } catch (e) { return String(val); }\n}\n\nconst type = g('type') || 'startup';\n\nif (type === 'x_tip') {\n  const author = g('author') || 'Unknown';\n  const summary = g('summary') || '';\n  const takeaway = g('takeaway') || '';\n  const post = g('post') || '';\n  const post_url = g('post_url') || '';\n  return [{\n    json: {\n      type: 'x_tip',\n      author,\n      summary,\n      takeaway,\n      post,\n      post_url,\n      name: '@' + author,\n      funding_amount: '',\n      round: '',\n      description: post || summary,\n      company: '',\n      category: '',\n      platform: 'X',\n      snippet: '@' + author + ': ' + summary + ' | ' + takeaway\n    }\n  }];\n}\n\nconst name = g('name') || g('headline') || g('topic') || 'Unknown';\nconst funding = g('funding') || '';\nconst round = g('round') || '';\nconst desc = g('desc') || g('detail') || g('angle') || '';\nconst company = g('company') || '';\nconst category = g('category') || '';\nconst platform = g('platform') || '';\n\nreturn [{\n  json: {\n    type: 'startup',\n    name,\n    funding_amount: funding,\n    round,\n    description: desc,\n    company,\n    category,\n    platform,\n    snippet: name + ' raised ' + funding + ' in ' + round + '. ' + desc\n  }\n}];"
+      },
+      "id": "parse-selection",
+      "name": "Parse Selection",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        250,
+        500
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "text",
+        "responseBody": "Content generation started. Check your email in 3-4 minutes.",
+        "options": {}
+      },
+      "id": "respond-webhook",
+      "name": "Respond to Browser",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        125,
+        500
+      ]
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": ""
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.type }}",
+                    "rightValue": "startup",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ]
+              },
+              "renameOutput": true,
+              "outputLabel": "Startup"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": ""
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.type }}",
+                    "rightValue": "x_tip",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ]
+              },
+              "renameOutput": true,
+              "outputLabel": "XTip"
+            }
+          ]
+        },
+        "options": {
+          "fallbackOutput": "none"
+        }
+      },
+      "id": "route-type",
+      "name": "Route by Type",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        500,
+        500
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.perplexity.ai/chat/completions",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer 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"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\"model\":\"sonar-pro\",\"messages\":[{\"role\":\"user\",\"content\":\"Research the AI startup '{{ $json.name }}' that recently raised {{ $json.funding_amount }} in a {{ $json.round }} round. {{ $json.description }}\\n\\nSearch Crunchbase, the company engineering blog, GitHub repos, TechCrunch, and technical publications.\\n\\nI need DEEP technical information ONLY about '{{ $json.name }}'. If you cannot find info, say so. Do NOT return info about a different company.\\n\\nProvide:\\n1) FULL TECH STACK: What specific ML/AI models, architectures, and frameworks do they use? Be precise: Transformers, diffusion models, GNNs, RL, PyTorch, TensorFlow, JAX, etc.\\n2) END-TO-END PIPELINE as 3-6 numbered layers/steps. For each layer name the specific technology and why it was chosen over alternatives.\\n3) What is technically NOVEL vs standard solutions?\\n4) Training data, datasets, or data sources used.\\n5) PRODUCTION ARCHITECTURE: How does inference work? Latency, throughput, edge vs cloud.\\n6) Key technical challenges at current stage.\\n7) Distinguish clearly between: pure engineering, traditional ML, deep learning, and LLM usage.\\n8) GitHub repos or engineering blog links if found.\\n\\nOnly verified information about '{{ $json.name }}'.\"}]}",
+        "options": {}
+      },
+      "id": "research-tech",
+      "name": "Research Technical",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        750,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.perplexity.ai/chat/completions",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer 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"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\"model\":\"sonar-pro\",\"messages\":[{\"role\":\"user\",\"content\":\"Research the AI startup '{{ $json.name }}'. Search Crunchbase for company profile, founding date, HQ location, and company URL.\\n\\nProvide ONLY information about '{{ $json.name }}':\\n1) What does a user actually experience? Walk through the user journey step by step.\\n2) Core value proposition in one sentence.\\n3) What problem does this solve that was previously unsolvable or extremely expensive?\\n4) Pricing model: Free tier, SaaS, usage-based, enterprise?\\n5) Actual customers or target customers. Name specific companies if known.\\n6) Integrations or platforms it works with.\\n7) Onboarding experience.\\n8) Crunchbase profile URL and company website if found.\\n\\nIf you cannot find information about '{{ $json.name }}', say so. Do NOT substitute a different company.\"}]}",
+        "options": {}
+      },
+      "id": "research-product",
+      "name": "Research Product",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        750,
+        450
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.perplexity.ai/chat/completions",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer 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"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\"model\":\"sonar-pro\",\"messages\":[{\"role\":\"user\",\"content\":\"Research the market, competitive landscape, and founders of '{{ $json.name }}' (an AI startup that {{ $json.description }}).\\n\\nSearch Crunchbase for funding round details, investor names, founder profiles, and company history.\\n\\nProvide ONLY verified information:\\n1) Total addressable market (TAM) with a specific dollar figure and source.\\n2) 3-5 direct competitors and how each differs technically from '{{ $json.name }}'.\\n3) Why NOW? What changed in the past 1-2 years that makes this possible?\\n4) Potential moat: data advantage, technical IP, distribution, network effects, regulatory?\\n5) Investors in this round and their investment thesis.\\n6) FOUNDERS: FULL NAMES (first and last) of ALL founders and co-founders. For each: previous companies, role there, university/education, years of experience, and why they are uniquely credible to solve this problem. This is CRITICAL -- do not skip.\\n7) Company long-term vision beyond current product.\\n8) Crunchbase profile URL if found.\\n\\nOnly verified information about '{{ $json.name }}'.\"}]}",
+        "options": {}
+      },
+      "id": "research-market",
+      "name": "Research Market & Competitors",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        750,
+        600
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.perplexity.ai/chat/completions",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer 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"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "{\"model\":\"sonar\",\"messages\":[{\"role\":\"user\",\"content\":\"Find 5 Instagram Reels or YouTube Shorts about AI startups or tech breakdowns that went viral in the past 14 days (high views, saves, shares).\\n\\nFor each viral video, tell me:\\n1. The exact opening HOOK (first sentence spoken that made people stop scrolling)\\n2. The FORMAT used (talking head, screen recording, whiteboard, text overlay heavy, carousel walkthrough)\\n3. Video LENGTH\\n4. What made it ENGAGING (pacing, visuals, information density, controversy)\\n\\nAlso tell me:\\n- Top 5 trending audio tracks on Instagram Reels for educational/tech content right now\\n- What carousel formats are getting the most saves on Instagram for tech content?\\n- What hook patterns are working best (question, stat, challenge, prediction, contrarian)?\\n\\nFocus on posts from AI builders, engineers, and tech founders. Not generic motivational content.\\nPlain text only, no markdown.\"}]}",
+        "options": {}
+      },
+      "id": "research-viral",
+      "name": "Research Viral Angles",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        750,
+        750
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "append",
+        "options": {},
+        "numberInputs": 4
+      },
+      "id": "wait-research",
+      "name": "Wait For Research",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3,
+      "position": [
+        1000,
+        500
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "let startup = {}, technical = {}, product = {}, market = {}, viral = '';\n\ntry { startup = $('Parse Selection').first().json || {}; } catch (e) { startup = { name: 'Unknown', funding_amount: 'Unknown', round: 'Unknown' }; }\ntry { const r = $('Research Technical').first().json || {}; technical = { content: r.choices?.[0]?.message?.content || '', citations: r.citations || [] }; } catch (e) { technical = { content: '', citations: [] }; }\ntry { const r = $('Research Product').first().json || {}; product = { content: r.choices?.[0]?.message?.content || '', citations: r.citations || [] }; } catch (e) { product = { content: '', citations: [] }; }\ntry { const r = $('Research Market & Competitors').first().json || {}; market = { content: r.choices?.[0]?.message?.content || '', citations: r.citations || [] }; } catch (e) { market = { content: '', citations: [] }; }\ntry { const r = $('Research Viral Angles').first().json || {}; viral = r.choices?.[0]?.message?.content || ''; } catch (e) { viral = ''; }\n\nconst name = startup.name || 'Unknown';\nfunction nameMatchVariants(n) {\n  const lower = String(n || '').toLowerCase().trim();\n  const out = new Set();\n  if (!lower) return [];\n  out.add(lower);\n  out.add(lower.replace(/\\s/g, ''));\n  out.add(lower.replace(/[^a-z0-9]/g, ''));\n  for (const p of lower.split(/[\\s.\\-_]+/)) {\n    if (p.length >= 3) out.add(p);\n  }\n  return [...out];\n}\nfunction textMentionsName(text, variants) {\n  const c = String(text || '').toLowerCase();\n  return variants.some(function (v) { return v.length >= 3 && c.indexOf(v) !== -1; });\n}\nconst variants = nameMatchVariants(name);\nconst techHasName = textMentionsName(technical.content, variants);\nconst prodHasName = textMentionsName(product.content, variants);\nconst mktHasName = textMentionsName(market.content, variants);\nconst qualityCount = (techHasName ? 1 : 0) + (prodHasName ? 1 : 0) + (mktHasName ? 1 : 0);\nconst researchIsRelevant = qualityCount >= 2;\nconst warningMessage = researchIsRelevant ? '' : 'WARNING: Research may not be about the correct startup. Only ' + qualityCount + ' of 3 research streams mention ' + name + '. Write ONLY about confirmed facts. Keep content shorter. Do NOT fill gaps with information about other companies.';\n\nfunction safeJson(s) {\n  return String(s || '').replace(/\\\\/g, '\\\\\\\\').replace(/\"/g, '\\\\\"').replace(/\\n/g, '\\\\n').replace(/\\r/g, '\\\\r').replace(/\\t/g, '\\\\t').substring(0, 12000);\n}\n\nreturn [{ json: { startup_name: safeJson(name), funding_amount: safeJson(startup.funding_amount || 'Unknown'), round: safeJson(startup.round || 'Unknown'), original_snippet: safeJson(startup.snippet || ''), technical_research: safeJson(technical.content || 'No technical research found for ' + name), technical_sources: (technical.citations || []).slice(0, 5), product_research: safeJson(product.content || 'No product research found for ' + name), product_sources: (product.citations || []).slice(0, 5), market_research: safeJson(market.content || 'No market research found for ' + name), market_sources: (market.citations || []).slice(0, 5), viral_angles: safeJson(viral || 'No viral content research available'), research_quality: { tech: techHasName, product: prodHasName, market: mktHasName, score: qualityCount }, research_warning: safeJson(warningMessage), research_passed: researchIsRelevant } }];"
+      },
+      "id": "combine-research",
+      "name": "Combine Research",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1220,
+        500
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": ""
+          },
+          "conditions": [
+            {
+              "id": "quality-check",
+              "leftValue": "={{ $json.research_passed }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "true"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "quality-gate",
+      "name": "Research Quality Gate",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1440,
+        500
+      ]
+    },
+    {
+      "parameters": {
+        "sendTo": "dhanumohitghanghaniya@gmail.com",
+        "subject": "=Research Failed: {{ $json.startup_name }}",
+        "emailType": "text",
+        "message": "=Research quality check FAILED for {{ $json.startup_name }}.\n\nOnly {{ $json.research_quality.score }} of 3 research streams mentioned the startup name.\n\nTech: {{ $json.research_quality.tech }}\nProduct: {{ $json.research_quality.product }}\nMarket: {{ $json.research_quality.market }}\n\nThis startup may be too new or obscure. Try a different one.",
+        "options": {}
+      },
+      "id": "research-failed-email",
+      "name": "Research Failed Email",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        1660,
+        700
+      ],
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "4DYU3b2FWRccyId8",
+          "name": "Gmail OAuth2 API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.anthropic.com/v1/messages",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-api-key",
+              "value": "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"
+            },
+            {
+              "name": "anthropic-version",
+              "value": "2023-06-01"
+            },
+            {
+              "name": "content-type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\"model\":\"claude-sonnet-4-6\",\"max_tokens\":2048,\"system\":\"You write scroll-stopping Instagram hooks for @mohit.builds.ai, a tech builder (IIT Bombay engineer, 6 years in tech) who breaks down AI startups.\\n\\nHooks must make people stop scrolling in under 2 seconds.\\n\\nRules:\\n- Pure English only, no Hinglish, no emojis\\n- Speakable in under 5 seconds\\n- Create an immediate knowledge gap or pattern interrupt\\n- Never start with the startup name\\n- Hook is about the PROBLEM, a SPECIFIC STAT, or a surprising TECHNICAL INSIGHT\\n- EVERY hook must contain a specific number, technology name, or concrete detail from the research. Generic hooks are BANNED.\\n- BANNED: 'game-changing', 'revolutionary', 'in the world of AI', 'this startup is doing something incredible'\\n\\nBefore outputting, ask: would a developer scrolling at 11 PM stop for this? If the hook could apply to ANY startup, rewrite with specifics.\\n\\n6 hooks in these styles:\\n1. PATTERN_INTERRUPT: Challenge an assumption with a specific counter-example from the research\\n2. SHOCKING_STAT: Lead with a specific number from the research\\n3. BUILDER_PERSPECTIVE: Reference a specific technical detail you found\\n4. PREDICTION: Specific prediction grounded in a fact from the research\\n5. PROBLEM_FIRST: State the problem with a specific stat or example\\n6. CURIOSITY_GAP: Use a specific technical detail to create the gap\\n\\nOutput ONLY a valid JSON array. No markdown code fences.\\n[{\\\"style\\\": \\\"PATTERN_INTERRUPT\\\", \\\"hook\\\": \\\"...\\\", \\\"why_it_works\\\": \\\"...\\\"}]\",\"messages\":[{\"role\":\"user\",\"content\":\"Generate 6 hooks for this startup:\\n\\nName: {{ $json.startup_name }}\\nFunding: {{ $json.funding_amount }} ({{ $json.round }})\\n\\nTechnical Research:\\n{{ $json.technical_research }}\\n\\nProduct Research:\\n{{ $json.product_research }}\\n\\nMarket Research:\\n{{ $json.market_research }}\\n\\nViral content trends:\\n{{ $json.viral_angles }}\\n\\n{{ $json.research_warning }}\\n\\nOutput ONLY the JSON array of 6 hooks. No other text.\"}]}",
+        "options": {}
+      },
+      "id": "generate-hooks",
+      "name": "Generate 6 Hook Options",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1660,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const input = items[0].json;\nconst hookResponse = input.content?.[0]?.text || input.choices?.[0]?.message?.content || '[]';\nlet hooks = [];\ntry {\n  const cleaned = hookResponse.replace(/```json\\n?/g, '').replace(/```\\n?/g, '').trim();\n  hooks = JSON.parse(cleaned);\n} catch (e) {\n  hooks = [{ style: 'BUILDER_PERSPECTIVE', hook: 'I found a ' + ($('Combine Research').first().json.funding_amount || '') + ' startup doing something nobody expected. Let me break it down.', why_it_works: 'Fallback hook' }];\n}\nconst research = $('Combine Research').first().json;\nconst selectedIndex = Math.floor(Math.random() * hooks.length);\nconst selectedHook = hooks[selectedIndex] || hooks[0];\nfunction safeJson(s) {\n  return String(s || '').replace(/\\\\/g, '\\\\\\\\').replace(/\"/g, '\\\\\"').replace(/\\n/g, '\\\\n').replace(/\\r/g, '\\\\r').replace(/\\t/g, '\\\\t').substring(0, 12000);\n}\nconst safeHook = { style: safeJson(selectedHook.style || ''), hook: safeJson(selectedHook.hook || ''), why_it_works: safeJson(selectedHook.why_it_works || '') };\n\nreturn [{ json: { selected_hook: safeHook, all_hooks: hooks, startup_name: research.startup_name, funding_amount: research.funding_amount, round: research.round, original_snippet: research.original_snippet, technical_research: research.technical_research, technical_sources: research.technical_sources, product_research: research.product_research, product_sources: research.product_sources, market_research: research.market_research, market_sources: research.market_sources, viral_angles: research.viral_angles, research_warning: research.research_warning } }];"
+      },
+      "id": "parse-hook",
+      "name": "Parse Best Hook",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1880,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.anthropic.com/v1/messages",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-api-key",
+              "value": "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"
+            },
+            {
+              "name": "anthropic-version",
+              "value": "2023-06-01"
+            },
+            {
+              "name": "content-type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\"model\":\"claude-sonnet-4-6\",\"max_tokens\":4096,\"system\":\"You write 60-90 second Instagram Reel scripts for @mohit.builds.ai \u2014 an IIT Bombay engineer with 6 years in tech who breaks down AI startups daily.\\n\\nVOICE:\\n- A builder explaining architecture to a smart friend. Confident, not salesy.\\n- Fast-paced, zero filler words. Every sentence earns its place.\\n- Pure English. No Hinglish, no emojis.\\n- We are NOT marketing this startup. We are explaining their tech, infra, and architecture so builders learn.\\n\\nSTRUCTURE:\\n\\nHOOK [0-3 sec]:\\nUse the provided hook. Must be spoken in under 5 seconds.\\n[VISUAL CUE: text overlay on dark #1A1A2E, text #FFF8F0]\\n\\nFUNDING + PROBLEM [3-12 sec]:\\nWhat they raised, from whom. What specific problem they solve. One visceral stat or example.\\n[VISUAL CUE: funding amount in #E8553A, problem stat large]\\n\\nFOUNDERS [12-18 sec]:\\nName the founders (first + last name). One line on background: previous company, university, domain expertise. Why THEY are credible for THIS problem.\\n[VISUAL CUE: founder names + backgrounds on clean background]\\n\\nHOW THE TECH WORKS [18-42 sec]:\\n3-6 numbered steps showing the technical layers/architecture.\\nFor each step: name the specific technology, model, or framework.\\nExplain it like showing a system diagram: data in -> processing layers -> output.\\nThis is the core of the reel. Be technically precise but simple.\\n[VISUAL CUE: numbered steps appearing one by one with tech names]\\n\\nMARKET + OPPORTUNITY [42-52 sec]:\\nWhat market are they in? How big (TAM with number)? Brief competitive context.\\nNot a sales pitch -- just sizing the space for builders to understand.\\n[VISUAL CUE: market size in #2D6A4F, competitor names]\\n\\nCLOSING [52-62 sec]:\\nOne technical insight about their architecture or infrastructure choice.\\nA builder-to-builder observation, NOT hype. Example: their use of X over Y is smart because Z.\\n[VISUAL CUE: key takeaway text on light background]\\n\\nCTA [62-70 sec]:\\nTechnical question for audience. Follow @mohit.builds.ai.\\n[VISUAL CUE: handle prompt]\\n\\nWORD BUDGET: HOOK ~20, FUNDING+PROBLEM ~50, FOUNDERS ~35, TECH ~100, MARKET ~40, CLOSING ~30, CTA ~20. Total under 300 words.\\n- PACE CHECK: read each section aloud; if it exceeds the time window, shorten.\\n\\nANTI-GENERIC CHECK: Every sentence must contain a specific fact, number, name, or technical term from the research. BANNED phrases: 'the industry is changing', 'this is interesting', 'in the world of AI', 'game-changing', 'revolutionary', 'groundbreaking'. If a sentence could apply to any startup, delete it.\\n\\nRULES:\\n- [XX sec] timing markers for each section\\n- [VISUAL CUE: ...] every 8-10 seconds with SPECIFIC text overlay suggestions\\n- Speakable script -- short sentences, natural pauses\\n- If data is missing, OMIT it. Never invent facts, repos, or numbers.\\n- Write ONLY about the specified startup.\\n\\nAfter the script:\\nCAPTION: (under 300 chars, technical question + CTA)\\nHASHTAGS: (8-10)\",\"messages\":[{\"role\":\"user\",\"content\":\"Write a reel script for:\\n\\nSTARTUP: {{ $json.startup_name }}\\nFUNDING: {{ $json.funding_amount }} ({{ $json.round }})\\n\\nUSE THIS HOOK: {{ $json.selected_hook.hook }}\\n\\nRESEARCH:\\n\\nTechnical:\\n{{ $json.technical_research }}\\n\\nProduct:\\n{{ $json.product_research }}\\n\\nMarket & Competitors:\\n{{ $json.market_research }}\\n\\nViral trends:\\n{{ $json.viral_angles }}\\n\\n{{ $json.research_warning }}\\n\\nREMINDER: Write about '{{ $json.startup_name }}' ONLY. Include founder names and backgrounds. Focus on explaining the tech architecture, not selling the startup. If research is weak, write shorter.\\nOutput the reel script with timing markers and visual cues, then CAPTION and HASHTAGS.\"}]}",
+        "options": {}
+      },
+      "id": "generate-reel",
+      "name": "Generate Reel Script",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2100,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.anthropic.com/v1/messages",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-api-key",
+              "value": "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"
+            },
+            {
+              "name": "anthropic-version",
+              "value": "2023-06-01"
+            },
+            {
+              "name": "content-type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\"model\":\"claude-sonnet-4-6\",\"max_tokens\":4096,\"system\":\"You create Instagram carousel content for @mohit.builds.ai \u2014 an IIT Bombay engineer who breaks down AI startups daily.\\n\\nFORMAT: 8-slide carousel (1080x1350px, Canva). We are NOT marketing this startup. We are explaining the tech so builders learn.\\n\\nBRAND COLORS: Ink #1A1A2E, Rust #E8553A, Cream #FFF8F0, Sage #2D6A4F, White #FFFFFF.\\n\\nSLIDE STRUCTURE:\\n\\nSLIDE 1 (COVER \u2014 Ink bg, Cream text):\\nBold question or statement about the PROBLEM (not the startup name).\\nSmall label: 'Startup of the Day' in Rust.\\n\\nSLIDE 2 (FUNDING + PROBLEM \u2014 Cream bg, Ink text):\\nWhat they raised, from whom. The problem in 2-3 punchy lines with a stat.\\n\\nSLIDE 3 (FOUNDERS \u2014 White bg, Ink text):\\n'Meet [STARTUP]' Founded by [FULL NAMES]. One line each: previous company, education, why credible. Funding amount in Rust.\\n\\nSLIDE 4 (TECH LAYER 1-2 \u2014 Cream bg):\\nFirst 2 steps of the technical architecture. Name specific technologies.\\n\\nSLIDE 5 (TECH LAYER 3-4 \u2014 White bg):\\nNext steps. Going deeper. Specific models, frameworks, infra choices.\\n\\nSLIDE 6 (TECH LAYER 5-6 \u2014 Cream bg, optional):\\nAdditional layers if the architecture warrants it. Skip if only 4 steps.\\n\\nSLIDE 7 (MARKET \u2014 Ink bg, Cream text):\\nTAM with dollar figure in Rust. Key competitors. How big is this space.\\n\\nSLIDE 8 (BUILDER INSIGHT + CTA \u2014 Rust bg, White text):\\nOne technical observation about their architecture choice. Not hype. Follow @mohit.builds.ai.\\n\\nSTANDALONE TEST: each slide useful if screenshotted alone.\\n\\nANTI-GENERIC CHECK: Every slide must contain a specific fact, number, or technical term. BANNED: 'game-changing', 'revolutionary', 'in the world of AI'. Delete generic filler.\\n\\nRULES:\\n- Each slide: MAX 40 words\\n- No emojis, no markdown. Pure English.\\n- If data missing, skip. Never invent.\\n\\nOUTPUT:\\nSLIDE 1: [text]\\n...\\nSLIDE 8: [text]\\nCAROUSEL CAPTION: [under 400 chars]\\nHASHTAGS: [10-12]\",\"messages\":[{\"role\":\"user\",\"content\":\"Create carousel for:\\n\\nSTARTUP: {{ $json.startup_name }}\\nFUNDING: {{ $json.funding_amount }} ({{ $json.round }})\\n\\nTechnical:\\n{{ $json.technical_research }}\\n\\nProduct:\\n{{ $json.product_research }}\\n\\nMarket & Founders:\\n{{ $json.market_research }}\\n\\n{{ $json.research_warning }}\\n\\nINCLUDE founder names and backgrounds in Slide 3. Focus on explaining the tech architecture. Output slide text, caption, and hashtags.\"}]}",
+        "options": {}
+      },
+      "id": "generate-carousel",
+      "name": "Generate Carousel Text",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2100,
+        500
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.anthropic.com/v1/messages",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-api-key",
+              "value": "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"
+            },
+            {
+              "name": "anthropic-version",
+              "value": "2023-06-01"
+            },
+            {
+              "name": "content-type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\"model\":\"claude-sonnet-4-6\",\"max_tokens\":1024,\"system\":\"You write Instagram captions for @mohit.builds.ai, a tech builder who breaks down AI startups.\\n\\nRules:\\n- Only state facts supported by the research. Omit unsupported claims.\\n- Pure English, no Hinglish, no emojis\\n- Under 300 characters for main caption text\\n- Include at least one specific technical detail or number\\n- End with a technical question for builders\\n- CTA: 'Save this' or 'Follow @mohit.builds.ai'\\n- 8-10 hashtags after caption\\n- BANNED: 'game-changing', 'revolutionary', 'groundbreaking'. Every sentence needs a specific fact.\\n\\nOutput:\\nCAPTION: [text]\\nHASHTAGS: [hashtags]\",\"messages\":[{\"role\":\"user\",\"content\":\"Caption for:\\n\\nStartup: {{ $json.startup_name }}\\nFunding: {{ $json.funding_amount }} ({{ $json.round }})\\nTech: {{ $json.technical_research }}\\nProduct: {{ $json.product_research }}\\n\\n{{ $json.research_warning }}\\n\\nInclude a specific technical detail. Output caption and hashtags.\"}]}",
+        "options": {}
+      },
+      "id": "generate-caption",
+      "name": "Generate Caption + Hashtags",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2100,
+        700
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "append",
+        "options": {},
+        "numberInputs": 3
+      },
+      "id": "wait-content",
+      "name": "Wait For Content",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3,
+      "position": [
+        2280,
+        500
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const research = $('Combine Research').first().json;\nconst hookData = $('Parse Best Hook').first().json;\n\nlet reelScript = 'Error';\ntry { const r = $('Generate Reel Script').first().json; reelScript = r.content?.[0]?.text || r.choices?.[0]?.message?.content || 'Failed'; } catch (e) { reelScript = 'Failed: ' + e.message; }\n\nlet carouselText = 'Error';\ntry { const r = $('Generate Carousel Text').first().json; carouselText = r.content?.[0]?.text || r.choices?.[0]?.message?.content || 'Failed'; } catch (e) { carouselText = 'Failed: ' + e.message; }\n\nlet caption = 'Error';\ntry { const r = $('Generate Caption + Hashtags').first().json; caption = r.content?.[0]?.text || r.choices?.[0]?.message?.content || 'Failed'; } catch (e) { caption = 'Failed: ' + e.message; }\n\nfunction safeJson(s) {\n  return String(s || '').replace(/\\\\/g, '\\\\\\\\').replace(/\"/g, '\\\\\"').replace(/\\n/g, '\\\\n').replace(/\\r/g, '\\\\r').replace(/\\t/g, '\\\\t').substring(0, 12000);\n}\nreturn [{ json: { startup_name: safeJson(research.startup_name), funding_amount: safeJson(research.funding_amount), round: safeJson(research.round), reel_script: safeJson(reelScript), carousel_text: safeJson(carouselText), caption: safeJson(caption), all_hooks: hookData.all_hooks || [], selected_hook: hookData.selected_hook || {}, technical_sources: research.technical_sources || [], product_sources: research.product_sources || [], market_sources: research.market_sources || [], research_warning: safeJson(research.research_warning || '') } }];"
+      },
+      "id": "prepare-refinement",
+      "name": "Prepare Refinement",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2420,
+        500
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.openai.com/v1/chat/completions",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer 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"
+            },
+            {
+              "name": "content-type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\"model\":\"gpt-4o\",\"max_tokens\":8192,\"messages\":[{\"role\":\"system\",\"content\":\"You are a content quality reviewer and flow editor for @mohit.builds.ai, an IIT Bombay engineer who breaks down AI startups on Instagram.\\n\\nYou receive THREE pieces of content about the same startup. Your job is to review, refine, and ensure the overall FLOW is smooth and coherent.\\n\\nANTI-HALLUCINATION: List every factual claim. For each, mark SUPPORTED or UNSUPPORTED based on research. Remove unsupported claims.\\n\\nSPECIFICITY CHECK: Flag and rewrite any sentence that could apply to any startup. Every sentence must contain something unique to THIS startup: a specific number, tech name, founder name, or architecture detail.\\n\\nFLOW CHECK: Read the reel script start to finish. Does it flow like a natural spoken narrative? Fix awkward transitions. Ensure the progression Hook -> Funding+Problem -> Founders -> Tech Steps -> Market -> Closing -> CTA feels like one coherent story.\\n\\nREVIEW CHECKLIST:\\n1. CONSISTENCY: All 3 pieces tell the same story. Fix contradictions.\\n2. HOOK QUALITY: Rate 1-10. If below 7, rewrite. Must create knowledge gap in under 5 seconds.\\n3. TECHNICAL ACCURACY: Flag vague claims. Replace with specifics or REMOVE. Shorter accurate > longer fabricated.\\n4. FOUNDER INFO: Are founders named with backgrounds? If missing, add from research.\\n5. TECH STEPS: Are the technical layers clear and numbered? Each step should name a specific technology.\\n6. VOICE: Builder explaining to builder. Not a news anchor or salesperson. No corporate-speak.\\n7. VISUAL CUES (reel): Every 8-10 seconds? Specific enough for an editor?\\n8. SLIDE WORD COUNT (carousel): Each under 40 words?\\n9. CTA: Must include @mohit.builds.ai.\\n10. BANNED PHRASES: Remove 'game-changing', 'revolutionary', 'groundbreaking', 'in the world of AI'.\\n\\nOUTPUT FORMAT:\\n---REFINED REEL SCRIPT---\\n[complete refined script]\\n---REFINED CAROUSEL TEXT---\\n[complete refined carousel]\\n---REFINED CAPTION---\\n[refined caption with hashtags]\\n---QUALITY SCORE---\\n[score/10]\\n---REVIEWER NOTES---\\n[2-5 bullets of what changed and why]\"},{\"role\":\"user\",\"content\":\"Review and refine this content about {{ $json.startup_name }} (raised {{ $json.funding_amount }} in {{ $json.round }}):\\n\\n=== REEL SCRIPT ===\\n{{ $json.reel_script }}\\n\\n=== CAROUSEL TEXT ===\\n{{ $json.carousel_text }}\\n\\n=== CAPTION ===\\n{{ $json.caption }}\\n\\n{{ $json.research_warning }}\\n\\nThis content is about '{{ $json.startup_name }}' ONLY. Review for accuracy, flow, voice, and specificity. Output refined versions.\"}]}",
+        "options": {}
+      },
+      "id": "refinement-pass",
+      "name": "Refinement Pass (OpenAI)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2640,
+        500
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const prepData = $('Prepare Refinement').first().json;\nlet refinedContent = 'Refinement failed';\ntry { refinedContent = items[0].json.content?.[0]?.text || items[0].json.choices?.[0]?.message?.content || 'Refinement failed'; } catch (e) { refinedContent = 'Refinement failed: ' + e.message; }\n\nconst sections = {};\nconst markers = ['REFINED REEL SCRIPT', 'REFINED CAROUSEL TEXT', 'REFINED CAPTION', 'QUALITY SCORE', 'REVIEWER NOTES'];\nfor (let i = 0; i < markers.length; i++) {\n  const startMarker = '---' + markers[i] + '---';\n  const startIdx = refinedContent.indexOf(startMarker);\n  if (startIdx === -1) continue;\n  const contentStart = startIdx + startMarker.length;\n  let contentEnd = refinedContent.length;\n  for (let j = i + 1; j < markers.length; j++) {\n    const nextIdx = refinedContent.indexOf('---' + markers[j] + '---');\n    if (nextIdx !== -1) { contentEnd = nextIdx; break; }\n  }\n  sections[markers[i]] = refinedContent.substring(contentStart, contentEnd).trim();\n}\n\nconst reelScript = sections['REFINED REEL SCRIPT'] || prepData.reel_script || 'Not available';\nconst carouselText = sections['REFINED CAROUSEL TEXT'] || prepData.carousel_text || 'Not available';\nconst caption = sections['REFINED CAPTION'] || prepData.caption || 'Not available';\nconst qualityScore = sections['QUALITY SCORE'] || 'N/A';\nconst reviewerNotes = sections['REVIEWER NOTES'] || 'No notes';\n\nlet hooksSection = '';\nconst allHooks = prepData.all_hooks || [];\nfor (let i = 0; i < allHooks.length; i++) {\n  hooksSection += (i + 1) + '. [' + (allHooks[i].style || 'HOOK') + '] ' + (allHooks[i].hook || '') + '\\n';\n  if (allHooks[i].why_it_works) hooksSection += '   Why: ' + allHooks[i].why_it_works + '\\n';\n  hooksSection += '\\n';\n}\n\nconst allSources = [...(prepData.technical_sources || []), ...(prepData.product_sources || []), ...(prepData.market_sources || [])].filter(Boolean).slice(0, 8);\n\nlet emailBody = 'INSTAGRAM CONTENT PACKAGE: ' + prepData.startup_name + '\\n';\nemailBody += 'Funding: ' + prepData.funding_amount + ' (' + prepData.round + ')\\n';\nemailBody += 'Generated: ' + new Date().toISOString() + '\\n\\n';\nemailBody += '========================================\\nREEL SCRIPT (60-90 sec)\\n========================================\\n\\n' + reelScript + '\\n\\n';\nemailBody += '========================================\\nCAROUSEL TEXT (7 slides)\\n========================================\\n\\n' + carouselText + '\\n\\n';\nemailBody += '========================================\\nCAPTION + HASHTAGS\\n========================================\\n\\n' + caption + '\\n\\n';\nemailBody += '========================================\\nQUALITY SCORE: ' + qualityScore + '\\n========================================\\n\\n';\nemailBody += 'REVIEWER NOTES:\\n' + reviewerNotes + '\\n\\n';\nemailBody += '========================================\\nALTERNATIVE HOOKS (pick your favorite)\\n========================================\\n\\n' + hooksSection + '\\n';\nemailBody += '========================================\\nSOURCES\\n========================================\\n\\n' + allSources.join('\\n') + '\\n';\n\nreturn [{ json: { emailBody, subject: 'Instagram Ready: ' + prepData.startup_name + ' (' + prepData.funding_amount + ')', startup_name: prepData.startup_name, quality_score: qualityScore } }];"
+      },
+      "id": "format-email",
+      "name": "Format Final Email",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2860,
+        500
+      ]
+    },
+    {
+      "parameters": {
+        "sendTo": "dhanumohitghanghaniya@gmail.com",
+        "subject": "={{ $json.subject }}",
+        "emailType": "text",
+        "message": "={{ $json.emailBody }}",
+        "options": {}
+      },
+      "id": "send-content-email",
+      "name": "Send Content Email",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        3080,
+        500
+      ],
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "4DYU3b2FWRccyId8",
+          "name": "Gmail OAuth2 API"
+        }
+      }
+    },
+    {
+      "id": "parse-x-tip",
+      "name": "Parse X Tip Selection",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        750,
+        950
+      ],
+      "parameters": {
+        "jsCode": "const p = $('Parse Selection').first().json || {};\nreturn [{ json: {\n  author: p.author || 'Unknown',\n  post: p.post || '',\n  summary: p.summary || '',\n  takeaway: p.takeaway || '',\n  snippet: p.snippet || '',\n  post_url: p.post_url || ''\n} }];"
+      }
+    },
+    {
+      "id": "research-tip-deeper",
+      "name": "Research Tip Deeper",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1000,
+        950
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.perplexity.ai/chat/completions",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer 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"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\"model\":\"sonar-pro\",\"messages\":[{\"role\":\"user\",\"content\":\"Research the following SPECIFIC TECHNICAL TOPIC in depth. DO NOT write a biography of the author. DO NOT write about who the author is. Research ONLY the topic/technique/concept described below.\\\\n\\\\nTOPIC DESCRIBED IN THIS POST:\\\\n{{ $json.post }}\\\\n\\\\nSummary of the topic: {{ $json.summary }}\\\\nKey takeaway: {{ $json.takeaway }}\\\\n(Posted by @{{ $json.author }} -- but research the TOPIC, not the person)\\\\n\\\\nProvide DEEP, VERIFIED technical research on the specific technique, tool, concept, or workflow discussed:\\\\n1) What exactly is this technique/tool/concept? Define it precisely.\\\\n2) How does it work technically? Architecture, algorithm, implementation details.\\\\n3) What specific frameworks, APIs, model names, repos are involved?\\\\n4) How could a builder reproduce or apply this? Concrete steps.\\\\n5) What are the alternatives and how does this approach compare?\\\\n6) Pitfalls, limitations, and what to verify before using.\\\\n7) 3-5 citations or primary sources.\\\\n\\\\nIMPORTANT: The author is IRRELEVANT. Do not write about their career, background, or achievements. Research the TECHNICAL TOPIC only.\\\\nIf you cannot verify something, say \\\\\\\"unverified\\\\\\\" -- do not invent repos or version numbers.\"}]}",
+        "options": {}
+      }
+    },
+    {
+      "id": "combine-tip-research",
+      "name": "Combine Tip Research",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1220,
+        950
+      ],
+      "parameters": {
+        "jsCode": "let tip = {};\ntry { tip = $('Parse X Tip Selection').first().json || {}; } catch (e) { tip = {}; }\nlet research = '';\nlet citations = [];\ntry {\n  const r = $('Research Tip Deeper').first().json || {};\n  research = r.choices?.[0]?.message?.content || '';\n  citations = (r.citations || []).slice(0, 8);\n} catch (e) { research = ''; }\nconst passed = research.length > 80;\nconst warning = passed ? '' : 'WARNING: Thin research. Keep the reel short and avoid strong factual claims.';\nfunction safeJson(s) {\n  return String(s || '').replace(/\\\\/g, '\\\\\\\\').replace(/\"/g, '\\\\\"').replace(/\\n/g, '\\\\n').replace(/\\r/g, '\\\\r').replace(/\\t/g, '\\\\t').substring(0, 12000);\n}\nreturn [{ json: {\n  author: safeJson(tip.author || 'Unknown'),\n  post: safeJson(tip.post || ''),\n  summary: safeJson(tip.summary || ''),\n  takeaway: safeJson(tip.takeaway || ''),\n  snippet: safeJson(tip.snippet || ''),\n  post_url: tip.post_url || '',\n  deep_research: safeJson(research || 'No deep research found.'),\n  research_sources: citations,\n  research_warning: safeJson(warning),\n  research_passed: passed\n} }];"
+      }
+    },
+    {
+      "id": "tip-quality-gate",
+      "name": "Tip Quality Gate",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1440,
+        950
+      ],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": ""
+          },
+          "conditions": [
+            {
+              "id": "tip-q",
+              "leftValue": "={{ $json.research_passed }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "true"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "tip-research-failed-email",
+      "name": "Tip Research Failed Email",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        1660,
+        1150
+      ],
+      "parameters": {
+        "sendTo": "dhanumohitghanghaniya@gmail.com",
+        "subject": "=Tip research thin: @{{ $json.author }}",
+        "emailType": "text",
+        "message": "=Could not get enough verified research for this X builder tip (@{{ $json.author }}). Try another item or research manually.\n\nSummary: {{ $json.summary }}",
+        "options": {}
+      },
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "4DYU3b2FWRccyId8",
+          "name": "Gmail OAuth2 API"
+        }
+      }
+    },
+    {
+      "id": "generate-tip-hooks",
+      "name": "Generate Tip Hooks",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1660,
+        850
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.anthropic.com/v1/messages",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-api-key",
+              "value": "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"
+            },
+            {
+              "name": "anthropic-version",
+              "value": "2023-06-01"
+            },
+            {
+              "name": "content-type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\"model\":\"claude-sonnet-4-6\",\"max_tokens\":2048,\"system\":\"You write scroll-stopping Instagram hooks for @mohit.builds.ai \u2014 builder-to-builder, crediting the original X creator.\\n\\nRules: Pure English, no emojis, under 5 seconds spoken. Create curiosity about a practical skill, tool, or mental model \u2014 not hype.\\n\\nEVERY hook must contain a specific technical detail, number, or tool name from the research. Generic hooks are BANNED. BANNED phrases: 'game-changing', 'revolutionary', 'incredible'. If the hook could apply to any topic, rewrite with specifics.\\n\\nBefore outputting each hook, ask: would a developer scrolling at 11 PM stop for this?\\n\\n6 hooks as JSON array: [{\\\"style\\\":\\\"...\\\",\\\"hook\\\":\\\"...\\\",\\\"why_it_works\\\":\\\"...\\\"}]\\nStyles: CREATOR_CREDIT, TOOL_FOCUS, PATTERN_INTERRUPT, MINI_TUTORIAL_TEASE, SHIPPER_LENS, CURIOSITY_GAP.\\n\\nOutput ONLY valid JSON array. No markdown fences.\",\"messages\":[{\"role\":\"user\",\"content\":\"Generate 6 hooks about this SPECIFIC TOPIC (not about the author as a person):\\n\\nTopic discussed by @{{ $json.author }}:\\nSummary: {{ $json.summary }}\\nTakeaway: {{ $json.takeaway }}\\n\\nDeep research on the topic:\\n{{ $json.deep_research }}\\n\\n{{ $json.research_warning }}\\n\\nHooks must be about the TOPIC/TECHNIQUE, not a bio of the author.\"}]}",
+        "options": {}
+      }
+    },
+    {
+      "id": "parse-tip-hook",
+      "name": "Parse Tip Hook",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1880,
+        850
+      ],
+      "parameters": {
+        "jsCode": "const input = items[0].json;\nconst hookResponse = input.content?.[0]?.text || input.choices?.[0]?.message?.content || '[]';\nlet hooks = [];\ntry { const cleaned = hookResponse.replace(/```json\\n?/g, '').replace(/```\\n?/g, '').trim(); hooks = JSON.parse(cleaned); } catch (e) {\n  hooks = [{ style: 'CREATOR_CREDIT', hook: 'I just saw @' + ($('Combine Tip Research').first().json.author || 'unknown') + ' share something every builder should understand in 60 seconds.', why_it_works: 'Fallback' }];\n}\nconst research = $('Combine Tip Research').first().json;\nconst selectedHook = hooks[Math.floor(Math.random() * hooks.length)] || hooks[0];\nfunction safeJson(s) {\n  return String(s || '').replace(/\\\\/g, '\\\\\\\\').replace(/\"/g, '\\\\\"').replace(/\\n/g, '\\\\n').replace(/\\r/g, '\\\\r').replace(/\\t/g, '\\\\t').substring(0, 12000);\n}\nconst safeHook = { style: safeJson(selectedHook.style || ''), hook: safeJson(selectedHook.hook || ''), why_it_works: safeJson(selectedHook.why_it_works || '') };\nreturn [{ json: {\n  selected_hook: safeHook,\n  all_hooks: hooks,\n  author: research.author,\n  post: research.post,\n  summary: research.summary,\n  takeaway: research.takeaway,\n  post_url: research.post_url || '',\n  deep_research: research.deep_research,\n  research_sources: research.research_sources || [],\n  research_warning: research.research_warning || ''\n} }];"
+      }
+    },
+    {
+      "id": "generate-tip-reel",
+      "name": "Generate Tip Reel Script",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2100,
+        750
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.anthropic.com/v1/messages",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-api-key",
+              "value": "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"
+            },
+            {
+              "name": "anthropic-version",
+              "value": "2023-06-01"
+            },
+            {
+              "name": "content-type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\"model\":\"claude-sonnet-4-6\",\"max_tokens\":4096,\"system\":\"You write 45-60 second Instagram Reels for @mohit.builds.ai \u2014 IIT Bombay engineer, 6 years in tech.\\n\\nThis reel explains a SPECIFIC TECHNICAL TOPIC from an X post. Credit the creator by @handle early but the reel is about the TOPIC, not the person.\\n\\nPACE: Include [XX sec] markers. PACE CHECK: each section must be readable aloud in its time window.\\nWord budgets: HOOK ~20, CREDIT+TOPIC ~40, EXPLAIN ~80, ACTION ~40, CTA ~20. Total under 180 words.\\n\\nStructure:\\nHOOK [0-3 sec]: use provided hook. [VISUAL CUE: Ink #1A1A2E]\\nCREDIT + TOPIC [3-8 sec]: name @handle, then immediately state the specific topic/technique they discussed. [VISUAL CUE: @handle + topic name]\\nWHY IT MATTERS [8-22 sec]: builder framing with specific numbers or benchmarks from research. [VISUAL CUE: Rust #E8553A key stat]\\nHOW IT WORKS [22-45 sec]: 3 numbered steps explaining the technique. Technically precise, name specific tools/models/frameworks. [VISUAL CUE: numbered steps]\\nTRY THIS [45-52 sec]: one concrete action (command, repo, or checklist) if research supports it. [VISUAL CUE: Sage #2D6A4F]\\nCTA [52-60 sec]: technical question + follow @mohit.builds.ai [VISUAL CUE]\\n\\nANTI-GENERIC: Every sentence must contain a specific fact, number, or technical term. BANNED: 'interesting', 'game-changing', 'incredible', generic bio info about the creator. If a sentence could apply to any topic, delete it.\\n\\nRules: Pure English, no emojis. Never invent repos, versions, or benchmarks.\\n\\nAfter script: CAPTION (under 300 chars, credit @creator, include specific detail) + HASHTAGS (8-10).\",\"messages\":[{\"role\":\"user\",\"content\":\"Write a reel about this SPECIFIC TOPIC (NOT a bio of the author):\\n\\nTopic posted by @{{ $json.author }}:\\nHOOK: {{ $json.selected_hook.hook }}\\nWhat the post was about: {{ $json.post }}\\nSummary: {{ $json.summary }}\\nKey takeaway: {{ $json.takeaway }}\\n\\nDeep research on the TOPIC:\\n{{ $json.deep_research }}\\n\\n{{ $json.research_warning }}\\n\\nThe reel must explain the TECHNIQUE/CONCEPT, not the person. Credit @{{ $json.author }} early then focus entirely on the topic.\\nOutput script with [VISUAL CUE] every ~8-10s, then CAPTION and HASHTAGS.\"}]}",
+        "options": {}
+      }
+    },
+    {
+      "id": "generate-tip-carousel",
+      "name": "Generate Tip Carousel",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2100,
+        950
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.anthropic.com/v1/messages",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-api-key",
+              "value": "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"
+            },
+            {
+              "name": "anthropic-version",
+              "value": "2023-06-01"
+            },
+            {
+              "name": "content-type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\"model\":\"claude-sonnet-4-6\",\"max_tokens\":4096,\"system\":\"You create a 5-slide Instagram carousel for @mohit.builds.ai about a SPECIFIC TECHNICAL TOPIC from an X post.\\n\\nBrand colors: Ink #1A1A2E, Rust #E8553A, Cream #FFF8F0, Sage #2D6A4F, White #FFFFFF.\\n\\nSTANDALONE TEST: each slide useful if screenshotted alone.\\n\\nSLIDE 1 COVER (Ink): provocative question about the TECHNIQUE/TOOL, not the creator name.\\nSLIDE 2 (Cream): credit @handle + state the specific topic. What did they demonstrate?\\nSLIDE 3 (White): the mechanism \u2014 how it works technically. Name specific tools, models, frameworks.\\nSLIDE 4 (Cream): practical steps / checklist a builder can try. Be specific: commands, repos, configs.\\nSLIDE 5 (Rust): your technical takeaway + Follow @mohit.builds.ai.\\n\\nANTI-GENERIC: Every slide must contain a specific technical detail. BANNED: generic filler, 'game-changing', 'incredible'. If a slide could apply to any topic, rewrite.\\n\\nMax 40 words per slide. No emojis. No markdown.\\n\\nOutput: SLIDE 1..5, CAROUSEL CAPTION (under 400 chars), HASHTAGS (10-12).\",\"messages\":[{\"role\":\"user\",\"content\":\"Carousel about this SPECIFIC TOPIC (not a bio of the author):\\n\\nTopic from @{{ $json.author }}:\\nSummary: {{ $json.summary }}\\nTakeaway: {{ $json.takeaway }}\\nOriginal post: {{ $json.post }}\\n\\nDeep research on the topic:\\n{{ $json.deep_research }}\\n\\n{{ $json.research_warning }}\\n\\nFocus on the TECHNIQUE, credit the creator but explain the topic.\"}]}",
+        "options": {}
+      }
+    },
+    {
+      "id": "generate-tip-caption",
+      "name": "Generate Tip Caption",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2100,
+        1150
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.anthropic.com/v1/messages",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-api-key",
+              "value": "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"
+            },
+            {
+              "name": "anthropic-version",
+              "value": "2023-06-01"
+            },
+            {
+              "name": "content-type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\"model\":\"claude-sonnet-4-6\",\"max_tokens\":1024,\"system\":\"Instagram caption for @mohit.builds.ai. Credit the X creator with @handle. Pure English, no emojis. Under 300 chars + 8-10 hashtags. Must include a specific technical detail from the research. BANNED: generic filler, 'game-changing', 'incredible'.\",\"messages\":[{\"role\":\"user\",\"content\":\"Caption about this TOPIC (not about the author as a person):\\n\\nTopic from @{{ $json.author }}:\\nSummary: {{ $json.summary }}\\nTakeaway: {{ $json.takeaway }}\\n\\nResearch: {{ $json.deep_research }}\\n\\n{{ $json.research_warning }}\\n\\nCredit @{{ $json.author }}, include a specific technical detail.\"}]}",
+        "options": {}
+      }
+    },
+    {
+      "id": "wait-tip-content",
+      "name": "Wait For Tip Content",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3,
+      "position": [
+        2280,
+        950
+      ],
+      "parameters": {
+        "mode": "append",
+        "options": {},
+        "numberInputs": 3
+      }
+    },
+    {
+      "id": "prepare-tip-refinement",
+      "name": "Prepare Tip Refinement",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2420,
+        950
+      ],
+      "parameters": {
+        "jsCode": "const research = $('Combine Tip Research').first().json;\nconst hookData = $('Parse Tip Hook').first().json;\nlet reelScript = 'Error';\ntry { const r = $('Generate Tip Reel Script').first().json; reelScript = r.content?.[0]?.text || ''; } catch (e) { reelScript = 'Failed'; }\nlet carouselText = 'Error';\ntry { const r = $('Generate Tip Carousel').first().json; carouselText = r.content?.[0]?.text || ''; } catch (e) { carouselText = 'Failed'; }\nlet caption = 'Error';\ntry { const r = $('Generate Tip Caption').first().json; caption = r.content?.[0]?.text || ''; } catch (e) { caption = 'Failed'; }\nfunction safeJson(s) {\n  return String(s || '').replace(/\\\\/g, '\\\\\\\\').replace(/\"/g, '\\\\\"').replace(/\\n/g, '\\\\n').replace(/\\r/g, '\\\\r').replace(/\\t/g, '\\\\t').substring(0, 12000);\n}\nreturn [{ json: {\n  author: safeJson(research.author),\n  reel_script: safeJson(reelScript),\n  carousel_text: safeJson(carouselText),\n  caption: safeJson(caption),\n  all_hooks: hookData.all_hooks || [],\n  selected_hook: hookData.selected_hook || {},\n  research_sources: research.research_sources || [],\n  research_warning: safeJson(research.research_warning || ''),\n  summary: safeJson(research.summary),\n  takeaway: safeJson(research.takeaway),\n  post_url: research.post_url || ''\n} }];"
+      }
+    },
+    {
+      "id": "tip-refinement-opus",
+      "name": "Tip Refinement (OpenAI)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2640,
+        950
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.openai.com/v1/chat/completions",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer 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"
+            },
+            {
+              "name": "content-type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\"model\":\"gpt-4o\",\"max_tokens\":8192,\"messages\":[{\"role\":\"system\",\"content\":\"You are the quality reviewer and flow editor for @mohit.builds.ai content about a practical AI builder insight (from an X post).\\n\\nANTI-HALLUCINATION: List every factual claim. Mark SUPPORTED or UNSUPPORTED. Remove unsupported claims.\\n\\nSPECIFICITY CHECK: Every sentence must contain something specific to this topic. Generic filler is banned.\\n\\nFLOW CHECK: Does the reel script flow as one natural narrative? Fix transitions.\\n\\nAlso check: creator credit with @handle, hook strength, pacing, standalone carousel slides, tools/repos/versions not invented.\\n\\nOutput exactly:\\n---REFINED REEL SCRIPT---\\n[full script]\\n---REFINED CAROUSEL TEXT---\\n[full carousel]\\n---REFINED CAPTION---\\n[caption + hashtags]\\n---QUALITY SCORE---\\n[X/10]\\n---REVIEWER NOTES---\\n[bullets]\"},{\"role\":\"user\",\"content\":\"Refine this package. Creator @{{ $json.author }}\\n\\nREEL:\\n{{ $json.reel_script }}\\n\\nCAROUSEL:\\n{{ $json.carousel_text }}\\n\\nCAPTION:\\n{{ $json.caption }}\\n\\n{{ $json.research_warning }}\"}]}",
+        "options": {}
+      }
+    },
+    {
+      "id": "format-tip-email",
+      "name": "Format Tip Email",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2860,
+        950
+      ],
+      "parameters": {
+        "jsCode": "const prep = $('Prepare Tip Refinement').first().json;\nlet refinedContent = '';\ntry { refinedContent = items[0].json.content?.[0]?.text || ''; } catch (e) { refinedContent = ''; }\nconst markers = ['REFINED REEL SCRIPT', 'REFINED CAROUSEL TEXT', 'REFINED CAPTION', 'QUALITY SCORE', 'REVIEWER NOTES'];\nconst sections = {};\nfor (let i = 0; i < markers.length; i++) {\n  const sm = '---' + markers[i] + '---';\n  const si = refinedContent.indexOf(sm);\n  if (si === -1) continue;\n  const cs = si + sm.length;\n  let ce = refinedContent.length;\n  for (let j = i + 1; j < markers.length; j++) {\n    const ni = refinedContent.indexOf('---' + markers[j] + '---');\n    if (ni !== -1) { ce = ni; break; }\n  }\n  sections[markers[i]] = refinedContent.substring(cs, ce).trim();\n}\nconst reel = sections['REFINED REEL SCRIPT'] || prep.reel_script;\nconst carousel = sections['REFINED CAROUSEL TEXT'] || prep.carousel_text;\nconst caption = sections['REFINED CAPTION'] || prep.caption;\nlet hooksSection = '';\nconst allHooks = prep.all_hooks || [];\nfor (let i = 0; i < allHooks.length; i++) {\n  hooksSection += (i + 1) + '. [' + (allHooks[i].style || '') + '] ' + (allHooks[i].hook || '') + '\\n';\n}\nlet body = 'INSTAGRAM \u2014 X BUILDER TIP PACKAGE\\n';\nbody += 'Inspired by @' + prep.author + '\\n';\nbody += 'Generated: ' + new Date().toISOString() + '\\n';\nif (prep.post_url) body += 'ORIGINAL POST: ' + prep.post_url + '\\n';\nbody += '\\n';\nbody += '========================================\\nREEL (45-60s)\\n========================================\\n\\n' + reel + '\\n\\n';\nbody += '========================================\\nCAROUSEL\\n========================================\\n\\n' + carousel + '\\n\\n';\nbody += '========================================\\nCAPTION\\n========================================\\n\\n' + caption + '\\n\\n';\nbody += '========================================\\nQUALITY\\n========================================\\n' + (sections['QUALITY SCORE'] || 'N/A') + '\\n\\n';\nbody += (sections['REVIEWER NOTES'] || '') + '\\n\\n';\nbody += '========================================\\nALT HOOKS\\n========================================\\n' + hooksSection + '\\n';\nbody += '========================================\\nSOURCES\\n========================================\\n' + (prep.research_sources || []).join('\\n');\nreturn [{ json: { emailBody: body, subject: 'Instagram Ready \u2014 X tip (@' + prep.author + ')', author: prep.author } }];"
+      }
+    },
+    {
+      "id": "send-tip-email",
+      "name": "Send Tip Email",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        3080,
+        950
+      ],
+      "parameters": {
+        "sendTo": "dhanumohitghanghaniya@gmail.com",
+        "subject": "={{ $json.subject }}",
+        "emailType": "text",
+        "message": "={{ $json.emailBody }}",
+        "options": {}
+      },
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "4DYU3b2FWRccyId8",
+          "name": "Gmail OAuth2 API"
+        }
+      }
+    },
+    {
+      "id": "read-dedup-sheet",
+      "name": "Read Dedup Sheet",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        350,
+        300
+      ],
+      "parameters": {
+        "jsCode": "const staticData = $getWorkflowStaticData('global');\nconst featuredStartups = staticData.featuredStartups || [];\n\nconst selectionData = $input.first().json;\nconst name = (selectionData.name || '').toLowerCase().trim();\nconst type = selectionData.type || 'startup';\n\nif (type !== 'startup' || !name) {\n  return [{ json: { ...selectionData, is_duplicate: false } }];\n}\n\nconst isDuplicate = featuredStartups.includes(name);\nreturn [{ json: { ...selectionData, is_duplicate: isDuplicate } }];"
+      }
+    },
+    {
+      "id": "dedup-gate",
+      "name": "Dedup Gate",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        500,
+        400
+      ],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": ""
+          },
+          "conditions": [
+            {
+              "id": "dedup-check",
+              "leftValue": "={{ $json.is_duplicate }}",
+              "rightValue": false,
+              "operator": {
+                "type": "boolean",
+                "operation": "false"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "already-featured-email",
+      "name": "Already Featured Email",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        700,
+        300
+      ],
+      "parameters": {
+        "sendTo": "dhanumohitghanghaniya@gmail.com",
+        "subject": "=Skipped: {{ $json.name }} (already featured)",
+        "emailType": "text",
+        "message": "=The startup '{{ $json.name }}' was already featured previously. Pick a different one from your daily email.",
+        "options": {}
+      },
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "4DYU3b2FWRccyId8",
+          "name": "Gmail OAuth2 API"
+        }
+      }
+    },
+    {
+      "id": "write-dedup-sheet",
+      "name": "Write Dedup Sheet",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3280,
+        500
+      ],
+      "parameters": {
+        "jsCode": "const staticData = $getWorkflowStaticData('global');\nconst featuredStartups = staticData.featuredStartups || [];\n\nconst startupName = $('Format Final Email').first().json.startup_name?.toLowerCase().trim();\nif (startupName && !featuredStartups.includes(startupName)) {\n  featuredStartups.push(startupName);\n  staticData.featuredStartups = featuredStartups;\n}\n\nreturn $input.all();"
+      }
+    }
+  ],
+  "connections": {
+    "Daily Discovery (6:30 AM IST)": {
+      "main": [
+        [
+          {
+            "node": "Search Startup Funding",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Search X Builder Insights",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Search Trending Content",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Search Startup Funding": {
+      "main": [
+        [
+          {
+            "node": "Wait For Discovery",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Search Trending Content": {
+      "main": [
+        [
+          {
+            "node": "Wait For Discovery",
+            "type": "main",
+            "index": 2
+          }
+        ]
+      ]
+    },
+    "Wait For Discovery": {
+      "main": [
+        [
+          {
+            "node": "Parse All Results",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse All Results": {
+      "main": [
+        [
+          {
+            "node": "Build Selection Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Selection Email": {
+      "main": [
+        [
+          {
+            "node": "Send Selection Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Content Generator (Webhook)": {
+      "main": [
+        [
+          {
+            "node": "Parse Selection",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Selection": {
+      "main": [
+        [
+          {
+            "node": "Read Dedup Sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read Dedup Sheet": {
+      "main": [
+        [
+          {
+            "node": "Dedup Gate",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Dedup Gate": {
+      "main": [
+        [
+          {
+            "node": "Route by Type",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Already Featured Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Route by Type": {
+      "main": [
+        [
+          {
+            "node": "Research Technical",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Research Product",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Research Market & Competitors",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Research Viral Angles",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Parse X Tip Selection",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Research Technical": {
+      "main": [
+        [
+          {
+            "node": "Wait For Research",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Research Product": {
+      "main": [
+        [
+          {
+            "node": "Wait For Research",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Research Market & Competitors": {
+      "main": [
+        [
+          {
+            "node": "Wait For Research",
+            "type": "main",
+            "index": 2
+          }
+        ]
+      ]
+    },
+    "Research Viral Angles": {
+      "main": [
+        [
+          {
+            "node": "Wait For Research",
+            "type": "main",
+            "index": 3
+          }
+        ]
+      ]
+    },
+    "Wait For Research": {
+      "main": [
+        [
+          {
+            "node": "Combine Research",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Combine Research": {
+      "main": [
+        [
+          {
+            "node": "Research Quality Gate",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Research Quality Gate": {
+      "main": [
+        [
+          {
+            "node": "Generate 6 Hook Options",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Research Failed Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate 6 Hook Options": {
+      "main": [
+        [
+          {
+            "node": "Parse Best Hook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Best Hook": {
+      "main": [
+        [
+          {
+            "node": "Generate Reel Script",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Generate Carousel Text",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Generate Caption + Hashtags",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Reel Script": {
+      "main": [
+        [
+          {
+            "node": "Wait For Content",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Carousel Text": {
+      "main": [
+        [
+          {
+            "node": "Wait For Content",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Generate Caption + Hashtags": {
+      "main": [
+        [
+          {
+            "node": "Wait For Content",
+            "type": "main",
+            "index": 2
+          }
+        ]
+      ]
+    },
+    "Wait For Content": {
+      "main": [
+        [
+          {
+            "node": "Prepare Refinement",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Refinement": {
+      "main": [
+        [
+          {
+            "node": "Refinement Pass (OpenAI)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Refinement Pass (OpenAI)": {
+      "main": [
+        [
+          {
+            "node": "Format Final Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format Final Email": {
+      "main": [
+        [
+          {
+            "node": "Send Content Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Content Email": {
+      "main": [
+        [
+          {
+            "node": "Write Dedup Sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Search X Builder Insights": {
+      "main": [
+        [
+          {
+            "node": "Wait For Discovery",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Parse X Tip Selection": {
+      "main": [
+        [
+          {
+            "node": "Research Tip Deeper",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Research Tip Deeper": {
+      "main": [
+        [
+          {
+            "node": "Combine Tip Research",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Combine Tip Research": {
+      "main": [
+        [
+          {
+            "node": "Tip Quality Gate",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Tip Quality Gate": {
+      "main": [
+        [
+          {
+            "node": "Generate Tip Hooks",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Tip Research Failed Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Tip Hooks": {
+      "main": [
+        [
+          {
+            "node": "Parse Tip Hook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Tip Hook": {
+      "main": [
+        [
+          {
+            "node": "Generate Tip Reel Script",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Generate Tip Carousel",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Generate Tip Caption",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Tip Reel Script": {
+      "main": [
+        [
+          {
+            "node": "Wait For Tip Content",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Tip Carousel": {
+      "main": [
+        [
+          {
+            "node": "Wait For Tip Content",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Generate Tip Caption": {
+      "main": [
+        [
+          {
+            "node": "Wait For Tip Content",
+            "type": "main",
+            "index": 2
+          }
+        ]
+      ]
+    },
+    "Wait For Tip Content": {
+      "main": [
+        [
+          {
+            "node": "Prepare Tip Refinement",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Tip Refinement": {
+      "main": [
+        [
+          {
+            "node": "Tip Refinement (OpenAI)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Tip Refinement (OpenAI)": {
+      "main": [
+        [
+          {
+            "node": "Format Tip Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format Tip Email": {
+      "main": [
+        [
+          {
+            "node": "Send Tip Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  }
+}
